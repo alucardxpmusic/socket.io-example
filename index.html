@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        .message-content {
+            position: fixed;
+            bottom: 0;
+            width: 80%;
+            height: 40px;
+            padding: 5px;
+        }
+
+        .message-content input {
+            width: 80%;
+            height: 100%;
+            border: solid 2px #4c4c4c;
+            border-radius: 20px;
+            outline: none;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="messages"></ul>
+    <div class="message-content">
+        <input id="content" autocomplete="off" />
+    </div>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script>
+        (function() {
+
+            window.CHAT = {
+                msgObj: document.getElementById('messages'),
+                socket: null,
+                logout: function() {
+                    location.reload();
+                },
+                submit: function() {
+                    var content = document.getElementById('content').value;
+                    if (content != '') {
+                        this.socket.emit('chat message', content);
+                        document.getElementById('content').value = '';
+                    }
+                    return false;
+                },
+                init: function() {
+                    //连接websocket后端服务器
+                    this.socket = io();
+                    //监听消息发送
+                    this.socket.on('chat message', function(msg) {
+                        // 创建一个元素节点
+                        var node = document.createElement("LI");
+                        // 创建一个文本节点
+                        var textnode = document.createTextNode(msg);
+                        // 向节点添加最后一个子节点
+                        node.appendChild(textnode);
+                        CHAT.msgObj.appendChild(node);
+                    });
+                }
+            }
+
+            CHAT.init();
+
+            //通过“回车”提交信息
+            document.getElementById("content").onkeydown = function(e) {
+                e = e || event;
+                if (e.keyCode === 13) {
+                    CHAT.submit();
+                }
+            };
+
+        })()
+    </script>
+</body>
+
+</html>
